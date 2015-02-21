@@ -8,6 +8,7 @@
 		</SSID>
 	</SSIDConfig>
 	<connectionType>ESS</connectionType>
+  <connectionMode>auto</connectionMode>
 	<MSM>
 		<security>
 			<authEncryption>
