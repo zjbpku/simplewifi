@@ -13,7 +13,8 @@ namespace SimpleWifi
 	public class Wifi
 	{
 		public event EventHandler<WifiStatusEventArgs> ConnectionStatusChanged;
-		
+		public event EventHandler<WlanNotificationEventArgs> WirelessNotification;
+
 		private WlanClient _client;
 		private WifiStatus _connectionStatus;
         private bool _isConnectionStatusSet = false;
@@ -94,6 +95,10 @@ namespace SimpleWifi
 
 		private void inte_WlanNotification(WlanNotificationData notifyData)
 		{
+            // Push this notification out to our listners
+            if (WirelessNotification != null)
+                WirelessNotification(this, new WlanNotificationEventArgs(notifyData));
+
 			if (notifyData.notificationSource == WlanNotificationSource.ACM && (NotifCodeACM)notifyData.NotificationCode == NotifCodeACM.Disconnected)
 				OnConnectionStatusChanged(WifiStatus.Disconnected);
 			else if (notifyData.notificationSource == WlanNotificationSource.MSM && (NotifCodeMSM)notifyData.NotificationCode == NotifCodeMSM.Connected)
@@ -149,4 +154,17 @@ namespace SimpleWifi
 		Disconnected,
 		Connected
 	}
+
+    public class WlanNotificationEventArgs : EventArgs
+    {
+        public WlanNotificationData eventData { get; private set; }
+
+        internal WlanNotificationEventArgs(WlanNotificationData status) : base()
+        {
+            this.eventData = status;
+        }
+
+    }
+
+
 }
