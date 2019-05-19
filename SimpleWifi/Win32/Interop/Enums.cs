@@ -224,7 +224,12 @@ namespace SimpleWifi.Win32.Interop
 		NetworkAvailable,
 		Disconnecting,
 		Disconnected,
-		AdhocNetworkStateChange
+		AdhocNetworkStateChange,
+		ProfileUnblocked,
+		ScreenPowerChange,
+		ProfileBlocked,
+		ScanListRefresh,
+		OperationalStateChange
 	}
 
 	/// <summary>
@@ -248,7 +253,9 @@ namespace SimpleWifi.Win32.Interop
 		PeerJoin,
 		PeerLeave,
 		AdapterRemoval,
-		AdapterOperationModeChange
+		AdapterOperationModeChange,
+		LinkDegraded,
+		LinkImproved
 	}
 	
 	/// <summary>
