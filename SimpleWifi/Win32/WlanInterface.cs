@@ -224,15 +224,57 @@ namespace SimpleWifi.Win32
 			}
 		}
 
-		#endregion
+        /// <summary>
+        /// Gets the radio state.
+        /// </summary>
+        /// <value>The radio state.</value>
+        /// <remarks>Not supported on Windows XP.</remarks>
+        public WlanRadioState RadioState
+        {
+            get
+            {
+                int valueSize;
+                IntPtr valuePtr;
+                WlanOpcodeValueType opcodeValueType;
 
-		/// <summary>
-		/// Requests a scan for available networks.
+                WlanInterop.ThrowIfError(WlanInterop.WlanQueryInterface(client.clientHandle, info.interfaceGuid, WlanIntfOpcode.RadioState, IntPtr.Zero, out valueSize, out valuePtr, out opcodeValueType));
+                try
+                {
+                    return (WlanRadioState)Marshal.PtrToStructure(valuePtr, typeof(WlanRadioState));
+                }
+                finally
+                {
+                    WlanInterop.WlanFreeMemory(valuePtr);
+                }
+            }
+        }
+
+        /// <summary>
+		/// Gets the radio state as a boolean
 		/// </summary>
-		/// <remarks>
-		/// The method returns immediately. Progress is reported through the <see cref="WlanNotification"/> event.
-		/// </remarks>
-		public void Scan()
+		/// <value>The radio state.</value>
+		/// <remarks>Not supported on Windows XP.</remarks>
+        public bool IsRadioOn
+        {
+            get
+            {
+                WlanRadioState state = RadioState;
+                if (state.numberofItems > 0)
+                    return (state.PhyRadioState[0].dot11HardwareRadioState == Dot11RadioState.On && state.PhyRadioState[0].dot11SoftwareRadioState == Dot11RadioState.On);
+
+                return false;
+            }
+        }
+
+        #endregion
+
+        /// <summary>
+        /// Requests a scan for available networks.
+        /// </summary>
+        /// <remarks>
+        /// The method returns immediately. Progress is reported through the <see cref="WlanNotification"/> event.
+        /// </remarks>
+        public void Scan()
 		{
 			WlanInterop.ThrowIfError(WlanInterop.WlanScan(client.clientHandle, info.interfaceGuid, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero));
 		}
