@@ -1,4 +1,4 @@
-﻿using SimpleWifi.Win32;
+using SimpleWifi.Win32;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -35,10 +35,32 @@ namespace SimpleWifi
             // Scan  all interfaces
             Scan();
 		}
-		
-		/// <summary>
-		/// Returns a list over all available access points
-		/// </summary>
+
+
+        /// <summary>
+        /// Returns count Wi-Fi Interfaces
+        /// </summary>
+        public int InterfacesCount()
+        {
+            return _client.Interfaces.Length;
+        }
+
+        /// <summary>
+        /// Returns Interfaces
+        /// </summary>
+        public WlanInterface[] Interfaces()
+        {
+            return _client.Interfaces;
+        }
+
+        /// <summary>
+        /// Returns the underlying WlanClient
+        /// </summary>
+        public WlanClient Client { get { return _client; } }
+
+        /// <summary>
+        /// Returns a list over all available access points
+        /// </summary>
 		public List<AccessPoint> GetAccessPoints(bool bRescan = true)
 		{
             List<AccessPoint> accessPoints = new List<AccessPoint>();
