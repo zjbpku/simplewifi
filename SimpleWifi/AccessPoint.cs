@@ -81,10 +81,64 @@ namespace SimpleWifi
 
 		}
 
+        public string SecurityMethod
+        {
+            get
+            {
+                string authAlgo = "Unknown";
+                switch(_network.dot11DefaultAuthAlgorithm)
+                {
+                    case Dot11AuthAlgorithm.IEEE80211_Open:
+                        authAlgo = "Open";  break;
+                    case Dot11AuthAlgorithm.IEEE80211_SharedKey:
+                        authAlgo = "WEP"; break;
+                    case Dot11AuthAlgorithm.RSNA:
+                        authAlgo = "WPA2-Enterprise"; break;
+                    case Dot11AuthAlgorithm.RSNA_PSK:
+                        authAlgo = "WPA2-Personal"; break;
+                    case Dot11AuthAlgorithm.WPA:
+                        authAlgo = "WPA"; break;
+                    case Dot11AuthAlgorithm.WPA_None:
+                        authAlgo = "WPA-None (Unsupported)"; break;
+                    case Dot11AuthAlgorithm.WPA_PSK:
+                        authAlgo = "WPA-Personal"; break;
+                }
+                if(_network.dot11DefaultAuthAlgorithm >= Dot11AuthAlgorithm.IHV_Start && _network.dot11DefaultAuthAlgorithm <= Dot11AuthAlgorithm.IHV_End)
+                    authAlgo = "IHV" + ((int)_network.dot11DefaultAuthAlgorithm).ToString();
+
+                string authCipher = "Unknown";
+                switch (_network.dot11DefaultCipherAlgorithm)
+                {
+                    case Dot11CipherAlgorithm.CCMP:
+                        authCipher = "AES"; break;
+                    case Dot11CipherAlgorithm.None:
+                        authCipher = "None"; break;
+                    case Dot11CipherAlgorithm.RSN_UseGroup:
+                        authCipher = "WPA Group"; break;
+                    case Dot11CipherAlgorithm.TKIP:
+                        authCipher = "TKIP"; break;
+                    case Dot11CipherAlgorithm.WEP:
+                        authCipher = "WEP"; break;
+                    case Dot11CipherAlgorithm.WEP104:
+                        authCipher = "WEP104"; break;
+                    case Dot11CipherAlgorithm.WEP40:
+                        authCipher = "WEP40"; break;
+                    //case Dot11CipherAlgorithm.WPA_UseGroup:
+                    //    authCipher = "WPA Group"; break;
+                }
+                if (_network.dot11DefaultCipherAlgorithm >= Dot11CipherAlgorithm.IHV_Start && _network.dot11DefaultCipherAlgorithm <= Dot11CipherAlgorithm.IHV_End)
+                    authCipher = "IHV" + ((int)_network.dot11DefaultCipherAlgorithm).ToString();
+
+                return string.Format("{0} ({1})", authAlgo, authCipher);
+            }
+        }
+
+        
+
 		/// <summary>
 		/// Returns the underlying network object.
 		/// </summary>
-		internal WlanAvailableNetwork Network
+		public WlanAvailableNetwork Network
 		{
 			get
 			{
@@ -96,7 +150,7 @@ namespace SimpleWifi
 		/// <summary>
 		/// Returns the underlying interface object.
 		/// </summary>
-		internal WlanInterface Interface
+		public WlanInterface Interface
 		{
 			get
 			{

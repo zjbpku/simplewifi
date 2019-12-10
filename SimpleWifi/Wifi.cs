@@ -13,11 +13,14 @@ namespace SimpleWifi
 	public class Wifi
 	{
 		public event EventHandler<WifiStatusEventArgs> ConnectionStatusChanged;
-		
+		public event EventHandler<WlanNotificationEventArgs> WirelessNotification;
+
 		private WlanClient _client;
 		private WifiStatus _connectionStatus;
         private bool _isConnectionStatusSet = false;
         public bool NoWifiAvailable = false;
+
+        private DateTime _lastScanned = DateTime.MinValue;
 
 		public Wifi()
 		{
@@ -28,6 +31,9 @@ namespace SimpleWifi
 			
 			foreach (var inte in _client.Interfaces)
 				inte.WlanNotification += inte_WlanNotification;
+
+            // Scan  all interfaces
+            Scan();
 		}
 
         /// <summary>
@@ -58,14 +64,22 @@ namespace SimpleWifi
         }
 
         /// <summary>
+        /// Returns the underlying WlanClient
+        /// </summary>
+        public WlanClient Client { get { return _client; } }
+
+        /// <summary>
         /// Returns a list over all available access points
         /// </summary>
-        public List<AccessPoint> GetAccessPoints()
+		public List<AccessPoint> GetAccessPoints(bool bRescan = true)
 		{
             List<AccessPoint> accessPoints = new List<AccessPoint>();
             if (_client.NoWifiAvailable)
                 return accessPoints;
-			
+
+            if (bRescan && (DateTime.Now - _lastScanned > TimeSpan.FromSeconds(60)))
+                Scan();
+
 			foreach (WlanInterface wlanIface in _client.Interfaces)
 			{
 				WlanAvailableNetwork[] rawNetworks = wlanIface.GetAvailableNetworkList(0);
@@ -89,6 +103,22 @@ namespace SimpleWifi
 
 			return accessPoints;
 		}
+
+		/// <summary>
+		/// Rescan all wifi interfaces
+		/// </summary>
+        public void Scan()
+        {
+            foreach (WlanInterface wlanIface in _client.Interfaces)
+            {
+                try
+                {
+                    wlanIface.Scan();
+                }
+                catch { }
+            }
+            _lastScanned = DateTime.Now;
+        }
 
 		/// <summary>
 		/// Disconnect all wifi interfaces
@@ -121,11 +151,15 @@ namespace SimpleWifi
 
 		private void inte_WlanNotification(WlanNotificationData notifyData)
 		{
-            if (notifyData.notificationSource == WlanNotificationSource.ACM && (NotifCodeACM)notifyData.NotificationCode == NotifCodeACM.Disconnected)
-                OnConnectionStatusChanged(WifiStatus.Disconnected);
-            else if (notifyData.notificationSource == WlanNotificationSource.ACM && (NotifCodeACM)notifyData.NotificationCode == NotifCodeACM.ConnectionComplete)
-                OnConnectionStatusChanged(WifiStatus.Connected);
-        }
+            // Push this notification out to our listners
+            if (WirelessNotification != null)
+                WirelessNotification(this, new WlanNotificationEventArgs(notifyData));
+
+			if (notifyData.notificationSource == WlanNotificationSource.ACM && (NotifCodeACM)notifyData.NotificationCode == NotifCodeACM.Disconnected)
+				OnConnectionStatusChanged(WifiStatus.Disconnected);
+			else if (notifyData.notificationSource == WlanNotificationSource.MSM && (NotifCodeMSM)notifyData.NotificationCode == NotifCodeMSM.Connected)
+				OnConnectionStatusChanged(WifiStatus.Connected);
+		}
 
 		private void OnConnectionStatusChanged(WifiStatus newStatus)
 		{
@@ -176,4 +210,17 @@ namespace SimpleWifi
 		Disconnected,
 		Connected
 	}
+
+    public class WlanNotificationEventArgs : EventArgs
+    {
+        public WlanNotificationData eventData { get; private set; }
+
+        internal WlanNotificationEventArgs(WlanNotificationData status) : base()
+        {
+            this.eventData = status;
+        }
+
+    }
+
+
 }
