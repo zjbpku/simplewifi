@@ -633,6 +633,15 @@ namespace SimpleWifi.Win32.Interop
 		/// </summary>
 		ERP = 6,
 		/// <summary>
+		/// Specifies the 802.11n PHY type.
+		/// </summary>
+		HT = 7,
+		/// <summary>
+		/// Specifies the 802.11ac PHY type. This is the very high throughput PHY type specified in IEEE 802.11ac.
+		/// This value is supported on Windows 8.1, Windows Server 2012 R2, and later.
+		/// </summary>
+		VHT = 8,
+		/// <summary>
 		/// Specifies the start of the range that is used to define PHY types that are developed by an independent hardware vendor (IHV).
 		/// </summary>
 		IHV_Start = 0x80000000,
