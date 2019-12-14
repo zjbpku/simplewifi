@@ -1,11 +1,9 @@
-﻿using SimpleWifi.Win32.Interop;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
+using SimpleWifi.Win32.Interop;
 
 namespace SimpleWifi.Win32
 {
@@ -186,6 +184,31 @@ namespace SimpleWifi.Win32
 		}
 
 		/// <summary>
+		/// Gets the radio state.
+		/// </summary>
+		/// <value>The radio state.</value>
+		/// <remarks>Not supported on Windows XP.</remarks>
+		public WlanRadioState RadioState
+		{
+			get
+			{
+				int valueSize;
+				IntPtr valuePtr;
+				WlanOpcodeValueType opcodeValueType;
+				WlanInterop.ThrowIfError(WlanInterop.WlanQueryInterface(client.clientHandle, info.interfaceGuid, WlanIntfOpcode.RadioState, IntPtr.Zero, out valueSize, out valuePtr, out opcodeValueType));
+
+				try
+				{
+					return (WlanRadioState) Marshal.PtrToStructure(valuePtr, typeof(WlanRadioState));
+				}
+				finally
+				{
+					WlanInterop.WlanFreeMemory(valuePtr);
+				}
+			}
+		}
+
+		/// <summary>
 		/// Gets the current operation mode.
 		/// </summary>
 		/// <value>The current operation mode.</value>
@@ -223,31 +246,6 @@ namespace SimpleWifi.Win32
 				}
 			}
 		}
-
-        /// <summary>
-        /// Gets the radio state.
-        /// </summary>
-        /// <value>The radio state.</value>
-        /// <remarks>Not supported on Windows XP.</remarks>
-        public WlanRadioState RadioState
-        {
-            get
-            {
-                int valueSize;
-                IntPtr valuePtr;
-                WlanOpcodeValueType opcodeValueType;
-
-                WlanInterop.ThrowIfError(WlanInterop.WlanQueryInterface(client.clientHandle, info.interfaceGuid, WlanIntfOpcode.RadioState, IntPtr.Zero, out valueSize, out valuePtr, out opcodeValueType));
-                try
-                {
-                    return (WlanRadioState)Marshal.PtrToStructure(valuePtr, typeof(WlanRadioState));
-                }
-                finally
-                {
-                    WlanInterop.WlanFreeMemory(valuePtr);
-                }
-            }
-        }
 
         /// <summary>
 		/// Gets the radio state as a boolean
